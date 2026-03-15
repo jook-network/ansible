@@ -1,0 +1,16 @@
+roles/backup_docker/
+roles/deploy_docker/
+roles/deploy_k3s/files/fullchain.pem
+roles/deploy_k3s/files/privkey.pem
+roles/deploy_wireguard/
+roles/disable_ipv6/
+roles/setup_nftables/
+roles/update_debian/
+
+backup_docker.yaml
+deploy_docker.yaml
+deploy_wireguard.yaml
+disable_ipv6.yaml
+inventory.yaml
+setup_nftables.yaml
+update_debian.yaml

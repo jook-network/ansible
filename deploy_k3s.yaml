@@ -1,0 +1,6 @@
+---
+- name: Deploy K3s
+  hosts: k3s
+  become: true
+  roles:
+     - deploy_k3s

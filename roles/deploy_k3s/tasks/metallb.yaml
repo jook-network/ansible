@@ -1,0 +1,45 @@
+---
+# install metallb
+- name: install metallb
+  kubernetes.core.k8s:
+    state: present
+    src: https://raw.githubusercontent.com/metallb/metallb/{{ metallb_version }}/config/manifests/metallb-native.yaml
+  become: false
+  delegate_to: localhost
+
+# wait for metallb to be ready
+- name: wait for metallb to be ready
+  ansible.builtin.pause:
+    seconds: 30
+
+# configure ipaddresspool
+- name: configure ipaddresspool
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: IPAddressPool
+      metadata:
+        name: default-pool
+        namespace: metallb-system
+      spec:
+        addresses:
+          - "{{ metallb_ip_range }}"
+  become: false
+  delegate_to: localhost
+
+# configure l2advertisement
+- name: configure l2advertisement
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: L2Advertisement
+      metadata:
+        name: l2-advert
+        namespace: metallb-system
+      spec:
+        ipAddressPools:
+          - default-pool
+  become: false
+  delegate_to: localhost

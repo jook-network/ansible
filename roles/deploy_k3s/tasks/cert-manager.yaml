@@ -1,0 +1,51 @@
+---
+# install cert-manager
+- name: install cert-manager
+  kubernetes.core.k8s:
+    state: present
+    src: https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
+  become: false
+  delegate_to: localhost
+
+# create certificates namespace
+- name: create certificates namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: certificates
+    state: present
+  become: false
+  delegate_to: localhost
+
+# create secret
+- name: create secret
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: jook-network
+        namespace: certificates
+      type: kubernetes.io/tls
+      stringData:
+        tls.crt: "{{ lookup('file', role_path + '/files/fullchain.pem') }}"
+        tls.key: "{{ lookup('file', role_path + '/files/privkey.pem') }}"
+  delegate_to: localhost
+  become: false
+
+#create tlsstore
+- name: create tlsstore
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: traefik.io/v1alpha1
+      kind: TLSStore
+      metadata:
+        name: default
+        namespace: certificates
+      spec:
+        defaultCertificate:
+          secretName: jook-network
+  delegate_to: localhost
+  become: false

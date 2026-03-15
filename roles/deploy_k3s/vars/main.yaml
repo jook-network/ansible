@@ -1,0 +1,13 @@
+---
+# versions 
+argocd_version: "v3.3.3"
+k3s_version: "v1.35.2+k3s1"
+metallb_version: "v0.15.3"
+
+# other variables
+argocd_fqdn: argocd.jook.network
+extra_server_args_list:
+  - "--disable=servicelb"
+home_dir: "{{ lookup('env','HOME') }}"
+k3s_fqdn: k3s.jook.network
+metallb_ip_range: 192.168.10.21-192.168.10.30

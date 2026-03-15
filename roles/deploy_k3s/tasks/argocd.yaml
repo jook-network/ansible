@@ -1,0 +1,112 @@
+---
+# create argocd namespace
+- name: create argocd namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: argocd
+    state: present
+  delegate_to: localhost
+  become: false
+
+# set default argocd version
+- name: set default argocd version
+  ansible.builtin.set_fact:
+    argocd_installed_version: "v0.0.0"
+
+# get argocd version
+- name: get argocd version
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: argocd-server
+    namespace: argocd
+  register: argocd_info
+  delegate_to: localhost
+  become: false
+  ignore_errors: true
+
+# set argocd version
+- name: set argocd version
+  ansible.builtin.set_fact:
+    argocd_installed_version: "{{ argocd_info.resources[0].spec.template.spec.containers[0].image.split(':')[1] }}"
+  when: argocd_info.resources | length > 0
+
+# install argocd
+- name: install argocd
+  ansible.builtin.command: >
+    kubectl apply -n argocd --server-side --force-conflicts
+    -f https://raw.githubusercontent.com/argoproj/argo-cd/{{ argocd_version }}/manifests/install.yaml
+  when: argocd_installed_version is version(argocd_version, '<')
+
+# create ingressroute
+- name: create ingressroute
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      metadata:
+        name: argocd-server
+        namespace: argocd
+      spec:
+        entryPoints:
+          - websecure
+        routes:
+          - kind: Rule
+            match: Host(`{{ argocd_fqdn }}`)
+            priority: 10
+            services:
+              - name: argocd-server
+                port: 80
+          - kind: Rule
+            match: Host(`{{ argocd_fqdn }}`) && Header('Content-Type', 'application/grpc')
+            priority: 11
+            services:
+              - name: argocd-server
+                port: 80
+                scheme: h2c
+        tls: {}
+  delegate_to: localhost
+  become: false
+
+# configure argocd insecure mode
+- name: configure argocd insecure mode
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: argocd-cmd-params-cm
+        namespace: argocd
+      data:
+        server.insecure: "true"
+  delegate_to: localhost
+  become: false
+
+# wait for argocd to be ready
+- name: wait for argocd  to be ready
+  ansible.builtin.pause:
+    seconds: 30
+
+# get argocd initial admin secret
+- name: get argocd initial admin secret
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: argocd-initial-admin-secret
+    namespace: argocd
+  register: argocd_secret
+  delegate_to: localhost
+  become: false
+
+# decode argocd admin secret
+- name: decode argocd admin secret
+  ansible.builtin.set_fact:
+    argocd_admin_password: "{{ argocd_secret.resources[0].data.password | b64decode }}"
+
+# show argocd admin secret
+- name: show argocd admin secret
+  ansible.builtin.debug:
+    msg: "ArgoCD admin password: {{ argocd_admin_password }}"
