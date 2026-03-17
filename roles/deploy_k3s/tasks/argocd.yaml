@@ -85,10 +85,21 @@
   delegate_to: localhost
   become: false
 
-# wait for argocd to be ready
-- name: wait for argocd  to be ready
-  ansible.builtin.pause:
-    seconds: 30
+## wait for argocd to be ready
+- name: wait for argocd to be ready
+  kubernetes.core.k8s_info:
+    kind: Secret
+    namespace: argocd
+    name: argocd-initial-admin-secret
+  register: argocd_secret
+  until: >
+    argocd_secret.resources | length > 0 and
+    argocd_secret.resources[0].data is defined and
+    argocd_secret.resources[0].data.password is defined
+  retries: 30
+  delay: 5
+  delegate_to: localhost
+  become: false
 
 # get argocd initial admin secret
 - name: get argocd initial admin secret

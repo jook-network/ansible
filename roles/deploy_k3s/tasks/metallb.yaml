@@ -7,10 +7,18 @@
   become: false
   delegate_to: localhost
 
-# wait for metallb to be ready
+## wait for metallb to be ready
 - name: wait for metallb to be ready
-  ansible.builtin.pause:
-    seconds: 30
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    namespace: metallb-system
+    name: controller
+  register: metallb_controller
+  until: metallb_controller.resources[0].status.availableReplicas | default(0) > 0
+  retries: 30
+  delay: 5
+  become: false
+  delegate_to: localhost
 
 # configure ipaddresspool
 - name: configure ipaddresspool
