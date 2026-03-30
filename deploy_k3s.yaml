@@ -1,6 +1,6 @@
 ---
 - name: Deploy K3s
-  hosts: k3s
+  hosts: kubernetes
   become: true
   roles:
      - deploy_k3s
