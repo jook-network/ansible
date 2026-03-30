@@ -1,4 +1,13 @@
 ---
+# wait for traefik to be ready
+- name: wait for traefik to be ready
+  shell: kubectl get crd tlsstores.traefik.io
+  register: crd_check
+  retries: 30
+  delay: 5
+  until: crd_check.rc == 0
+  changed_when: false
+
 # install cert-manager
 - name: install cert-manager
   kubernetes.core.k8s:
