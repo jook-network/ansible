@@ -2,12 +2,9 @@
 # versions 
 argocd_version: "v3.4.3"
 k3s_version: "v1.36.1+k3s1"
-#metallb_version: "v0.15.3"
 
 # other variables
 argocd_fqdn: argocd.jook.network
-#extra_server_args_list:
-#  - "--disable=servicelb"
 extra_server_args_list:
    - ""
 home_dir: "{{ lookup('env','HOME') }}"
