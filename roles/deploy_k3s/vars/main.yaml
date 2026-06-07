@@ -9,4 +9,3 @@ extra_server_args_list:
    - ""
 home_dir: "{{ lookup('env','HOME') }}"
 k3s_fqdn: kubernetes.jook.network
-#metallb_ip_range: 192.168.10.21-192.168.10.30
