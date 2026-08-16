@@ -1,7 +1,7 @@
 ---
 # versions 
-argocd_version: "v3.4.3"
-k3s_version: "v1.36.1+k3s1"
+argocd_version: "v3.5.1"
+k3s_version: "v1.36.3+k3s1"
 
 # other variables
 argocd_fqdn: argocd.jook.network
