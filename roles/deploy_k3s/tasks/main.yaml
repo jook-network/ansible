@@ -2,6 +2,9 @@
 - name: prerequisites
   include_tasks: prerequisites.yaml
 
+- name: iscsi
+  include_tasks: iscsi.yaml
+
 - name: k3s
   include_tasks: k3s.yaml
 
