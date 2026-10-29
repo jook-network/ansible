@@ -1,4 +1,5 @@
 ---
+# get packages before upgrade
 - name: get packages before upgrade
   ansible.builtin.command:
     argv:
@@ -7,12 +8,14 @@
       - "-f=${binary:Package}|${Version}\n"
   register: packages_before
 
+# update debian
 - name: update debian
   ansible.builtin.apt:
     update_cache: true
     upgrade: dist
     cache_valid_time: 3600
 
+# get packages after upgrade
 - name: get packages after upgrade
   ansible.builtin.command:
     argv:
@@ -21,7 +24,8 @@
       - "-f=${binary:Package}|${Version}\n"
   register: packages_after
 
-- name: Convert package inventories to dictionaries
+# convert package inventories to dictionaries
+- name: convert package inventories to dictionaries
   ansible.builtin.set_fact:
     packages_before_dict: >-
       {{
@@ -38,11 +42,13 @@
         )
       }}
 
-- name: Initialize package changes
+# initialize package_changes
+- name: initialize package_changes
   ansible.builtin.set_fact:
     package_changes: []
 
-- name: Identify packages with changed versions
+# identify packages with changed versions
+- name: identify packages with changed versions
   ansible.builtin.set_fact:
     package_changes: >-
       {{ package_changes + [
@@ -52,11 +58,13 @@
   loop: "{{ packages_before_dict.keys() | intersect(packages_after_dict.keys()) | list }}"
   when: packages_before_dict[item] != packages_after_dict[item]
 
+# check if reboot is required
 - name: check if reboot is required
   ansible.builtin.stat:
     path: /var/run/reboot-required
   register: reboot_required
 
+# set reboot message fact
 - name: set reboot message fact
   ansible.builtin.set_fact:
     reboot_message: >-
@@ -66,6 +74,7 @@
       No reboot is needed.
       {% endif %}
 
+# send notification
 - name: send notification
   when: package_changes | length > 0
   ansible.builtin.uri:
