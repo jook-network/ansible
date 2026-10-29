@@ -1,0 +1,6 @@
+---
+- name: Disable IPv6
+  hosts: management.jook.network
+  become: true
+  roles:
+    - disable_ipv6
