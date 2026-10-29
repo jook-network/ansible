@@ -8,6 +8,9 @@
 - name: k3s
   include_tasks: k3s.yaml
 
+- name: metallb
+  include_tasks: metallb.yaml
+
 - name: cert-manager
   include_tasks: cert-manager.yaml
 
