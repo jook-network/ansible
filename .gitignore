@@ -2,6 +2,7 @@ roles/backup_docker/
 roles/deploy_docker/
 roles/deploy_k3s/files/fullchain.pem
 roles/deploy_k3s/files/privkey.pem
+roles/deploy_k3s/vars/main.yaml
 roles/deploy_wireguard/
 roles/setup_nftables/
 roles/update_debian/vars/main.yaml
