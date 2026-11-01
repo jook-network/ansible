@@ -1,0 +1,17 @@
+---
+# install unbound
+- name: install unbound
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - unbound
+
+# copy unbound.conf
+- name: copy unbound.conf
+  ansible.builtin.copy:
+    src: unbound.conf
+    dest: /etc/unbound/unbound.conf.d
+    owner: root
+    group: root
+    mode: '0644'

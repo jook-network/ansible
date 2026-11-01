@@ -1,0 +1,6 @@
+---
+- name: deploy unbound
+  hosts: unbound
+  become: true
+  roles:
+    - deploy_unbound
